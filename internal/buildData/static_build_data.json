@@ -1,0 +1,8 @@
+{
+    "cleanup": {
+        "removePathsOnBuild": [
+            "CHANGELOG.md",
+            "__scripts__/"
+        ]
+    }
+}
