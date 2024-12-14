@@ -1,0 +1,68 @@
+import React from "react";
+import NoteTypeSearchResultList from "#/components/notePageComponents/searchResultList";
+import { NoteFilter } from "@ulld/api/classes/search/noteFilter";
+import { NoteTypePageProps } from "@ulld/utilities/types";
+import appConfig from "appConfig";
+import NotePageWrapperTemplate from "#/components/notePageComponents/pageContainer";
+import { AppConfigSchemaOutput } from "@ulld/configschema/zod/main";
+import NoteSummaryItem from "#/components/slots/search/items/noteSummary";
+import NotesSearchResultsListComponent from "#/components/slots/search/lists/noteSearchResultsList";
+import PaginationGroup from "#/components/slots/ui/pagination";
+import NoteTypeSecondaryFilterTemplate from "#/components/notePageComponents/secondaryNoteTypeFilter";
+import { notFound } from "next/navigation";
+import { getFilteredSearchResults } from "@ulld/api/getFilteredSearchResults";
+
+const categoryId: string = "{{.CATEGORY_ID}}";
+
+const baseUrl: string = "{{.BASE_URL}}"
+
+const NoteTypeGeneratedPage = async (props: NoteTypePageProps) => {
+    const { docTypeData, sp, filter, secondaryData } = await getFilteredSearchResults({
+        categoryId,
+        appConfig,
+        searchParams: props.searchParams
+    });
+
+    if(!docTypeData){
+        return notFound();
+    }
+
+    return (
+        <NotePageWrapperTemplate
+            {...props}
+            docTypeData={docTypeData as AppConfigSchemaOutput["noteTypes"][number]}
+        >
+            <NoteTypeSecondaryFilterTemplate 
+                {...props}
+                data={secondaryData}
+                noteType={docTypeData as AppConfigSchemaOutput["noteTypes"][number]}
+            />
+            <NoteTypeSearchResultList
+                secondaryData={secondaryData}
+                notes={
+                    <NotesSearchResultsListComponent>
+                        {filter.notes.map((item, i) => (
+                            <NoteSummaryItem
+                                key={`note-${item.id}`}
+                                item={item}
+                                index={i}
+                                searchType={"byNoteType"}
+                            />
+                        ))}
+                    </NotesSearchResultsListComponent>
+                }
+            />
+            <PaginationGroup 
+                currentPage={props.searchParams?.page ? parseInt(props.searchParams.page) : 1}
+                totalItems={filter.totalFound}
+                itemsPerPage={filter.perPage}
+                hrefTemplate={`${baseUrl}?${sp.toString()}`}
+                implementationType="noteSearchResult"
+            />
+        </NotePageWrapperTemplate>
+    );
+};
+
+NoteTypeGeneratedPage.displayName = `NoteTypeGeneratedPage-${categoryId}`;
+
+export default NoteTypeGeneratedPage;
