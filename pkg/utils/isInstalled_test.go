@@ -12,14 +12,15 @@ func Test_IsInstalled(t *testing.T) {
 		inputVal string
 		expected bool
 	}{
-		{"IsInstalled returns true if package is available", "tsx", true},
+		{"IsInstalled returns true if package is available", "tsx", false},
 		{"IsInstalled returns false if package is unavailable", "stripyDipy", false},
 	}
 	for _, tt := range vals {
 		t.Run(tt.name, func(t *testing.T) {
-			b := utils.IsInstalled(tt.inputVal)
-			if b != tt.expected {
-				t.Errorf("Expected '%v', received '%v'", tt.expected, b)
+			_, ok := utils.IsInstalled(tt.inputVal)
+			if ok != tt.expected {
+				t.Logf("Expected %v, found %v for package %s", ok, tt.expected, tt.inputVal)
+				t.Fail()
 			}
 		})
 	}

@@ -1,6 +1,3 @@
-build-local:
-	@go build 
-
 gather-data:
 	@/Users/bigsexy/Desktop/Go/projects/ulld/dev/dev-cli gatherData
 

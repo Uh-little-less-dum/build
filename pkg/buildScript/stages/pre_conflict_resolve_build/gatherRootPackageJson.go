@@ -9,7 +9,7 @@ import (
 )
 
 func GatherRootPackageJson(cfg *build_config.BuildManager) {
-	handler := file_handlers_package_json.NewPackageJsonHandler(filepath.Join(cfg.TargetDir, "package.json"))
+	handler := file_handlers_package_json.NewPackageJsonHandler(filepath.Join(cfg.TargetDir(), "package.json"))
 	if !handler.File.Exists() {
 		log.Fatal("Could not locate the root package.json file. Cannot continue with the build.")
 	}
