@@ -1,4 +1,4 @@
-package slots
+package slot_map
 
 type Slot struct {
 	Id       SlotKey

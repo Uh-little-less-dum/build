@@ -1,0 +1,11 @@
+import { OutputMethods } from "@ulld/configschema/types";
+{{range .}}import {{.ImportName}} from "{{.ImportPath}}";\n{{end}}
+
+const methodList: OutputMethods<any, "{{.SyncType}}"> = [{{range .}}
+{
+    func: {{.ImportName}},
+    pluginId: "{{.PluginName}}"
+},{{end}}
+]
+
+export default methodList

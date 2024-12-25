@@ -5,7 +5,7 @@ import (
 
 	build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
 	stage_pre_conflict_resolve_build "github.com/Uh-little-less-dum/build/pkg/buildScript/stages/pre_conflict_resolve_build"
-	ulld_plugin "github.com/Uh-little-less-dum/build/pkg/classesKinda/plugin"
+	ulld_plugin "github.com/Uh-little-less-dum/build/pkg/plugin"
 )
 
 func iWantToSeeYourManager() *build_config.BuildManager {

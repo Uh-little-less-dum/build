@@ -5,6 +5,6 @@ import (
 )
 
 func GatherPlugins(cfg *build_config.BuildManager) {
-	data := cfg.AppConfig().GatherPlugins()
+	data := cfg.AppConfig().GatherPlugins(cfg.Paths)
 	cfg.SetPlugins(data)
 }

@@ -1,13 +1,19 @@
 package target_paths
 
 import (
+	"fmt"
 	"path/filepath"
 
+	parser_types "github.com/Uh-little-less-dum/go-utils/pkg/constants/parserTypes"
 	"github.com/charmbracelet/log"
 )
 
 type TargetPaths struct {
 	projectRoot string
+}
+
+func (t TargetPaths) TargetDir() string {
+	return t.projectRoot
 }
 
 // Path to the root of the public directory.
@@ -25,10 +31,6 @@ func (t TargetPaths) PackageJson() string {
 	return filepath.Join(t.projectRoot, "package.json")
 }
 
-// Path to the app directory at src/app
-func (t TargetPaths) App() string {
-	return filepath.Join(t.projectRoot, "src", "app")
-}
 func (t TargetPaths) ProjectRoot() string {
 	return t.projectRoot
 }
@@ -106,8 +108,13 @@ func (t TargetPaths) OnBuildMethodList() string {
 func (t TargetPaths) Methods() string {
 	return filepath.Join(t.projectRoot, "src", "methods")
 }
+
 func (t TargetPaths) MdxParserList() string {
 	return filepath.Join(t.projectRoot, "src", "methods", "parsers", "parserLists", "mdx.ts")
+}
+
+func (t TargetPaths) ParserListOfType(parserType parser_types.ParserType) string {
+	return filepath.Join(t.projectRoot, "src", "methods", "parsers", "parserLists", fmt.Sprintf("%s.ts", parserType))
 }
 
 // Returns the temporary *directory* path within the build output.
@@ -140,6 +147,6 @@ func (t TargetPaths) XdgPaths() string {
 	return ""
 }
 
-func NewTargetPaths(rootDir string) TargetPaths {
-	return TargetPaths{projectRoot: rootDir}
+func NewTargetPaths(rootDir string) *TargetPaths {
+	return &TargetPaths{projectRoot: rootDir}
 }

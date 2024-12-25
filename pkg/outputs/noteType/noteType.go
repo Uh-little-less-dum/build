@@ -5,15 +5,15 @@ import (
 	"strings"
 	"sync"
 
-	target_paths "github.com/Uh-little-less-dum/build/pkg/classesKinda/targetPaths"
 	outputs_note_type_page "github.com/Uh-little-less-dum/build/pkg/outputs/noteType/noteTypePage"
 	outputs_note_type_search_page "github.com/Uh-little-less-dum/build/pkg/outputs/noteType/noteTypeSearchPage"
+	target_paths "github.com/Uh-little-less-dum/build/pkg/targetPaths"
 	schemas_app_config "github.com/Uh-little-less-dum/go-utils/pkg/schemastructs/ulldAppConfig"
 	"github.com/charmbracelet/log"
 )
 
 func getNoteTypePaths(noteUrl string, pathData target_paths.TargetPaths) (noteTypeSearchPage string, noteTypePage string) {
-	items := []string{pathData.App()}
+	items := []string{pathData.AppDir()}
 	items = append(items, strings.Split(noteUrl, string(filepath.Separator))...)
 	dirPath := filepath.Join(items...)
 	return filepath.Join(dirPath, "page.tsx"), filepath.Join(dirPath, "[...slug]", "page.tsx")

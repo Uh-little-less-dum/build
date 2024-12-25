@@ -31,3 +31,8 @@ func (n *Npm) Add(items []types.Installable) *exec.Cmd {
 func (n *Npm) SetWorkingDir(workingDir string) {
 	n.cwd = workingDir
 }
+
+func (n *Npm) RunScript(cmds ...string) *exec.Cmd {
+	c := append([]string{"run"}, cmds...)
+	return exec.Command("npm", c...)
+}

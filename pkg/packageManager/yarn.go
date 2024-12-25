@@ -31,3 +31,8 @@ func (n *Yarn) Add(items []types.Installable) *exec.Cmd {
 func (n *Yarn) SetWorkingDir(workingDir string) {
 	n.cwd = workingDir
 }
+
+func (n *Yarn) RunScript(cmds ...string) *exec.Cmd {
+	c := append([]string{"run"}, cmds...)
+	return exec.Command("yarn", c...)
+}

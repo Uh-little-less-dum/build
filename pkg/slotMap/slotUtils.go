@@ -1,4 +1,4 @@
-package slots
+package slot_map
 
 func StringToSlotId(id string) SlotKey {
 	iterator := SlotIdIterator()

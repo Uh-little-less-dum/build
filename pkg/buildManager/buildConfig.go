@@ -5,9 +5,12 @@ import (
 
 	config_loc_strategies "github.com/Uh-little-less-dum/build/pkg/buildConstants/configLocationStrategies"
 	form_data "github.com/Uh-little-less-dum/build/pkg/buildManager/formData"
-	ulld_plugin "github.com/Uh-little-less-dum/build/pkg/classesKinda/plugin"
+	conflicts_handler "github.com/Uh-little-less-dum/build/pkg/conflicts/conflictsManager"
+	database_manager "github.com/Uh-little-less-dum/build/pkg/databaseManager"
 	env_vars "github.com/Uh-little-less-dum/build/pkg/envVars"
 	package_managers "github.com/Uh-little-less-dum/build/pkg/packageManager"
+	ulld_plugin "github.com/Uh-little-less-dum/build/pkg/plugin"
+	target_paths "github.com/Uh-little-less-dum/build/pkg/targetPaths"
 	"github.com/Uh-little-less-dum/build/pkg/types"
 	"github.com/Uh-little-less-dum/build/pkg/utils"
 	app_config "github.com/Uh-little-less-dum/go-utils/pkg/buildFiles/appConfig"
@@ -21,8 +24,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// FIX:
-// RESUME: Move most of these fields, particularly those with structs to pointers.
 type BuildManager struct {
 	form_data.BuildFormData
 	AppConfigPath        string
@@ -38,7 +39,10 @@ type BuildManager struct {
 	appConfig            *app_config.AppConfig
 	appConfigLocStrategy config_loc_strategies.ConfigLocationStrategy
 	packageManager       package_managers.PackageManagerId
+	Conflicts            conflicts_handler.BuildConflictsManager
 	Program              *tea.Program
+	Paths                *target_paths.TargetPaths
+	Db                   *database_manager.DatabaseManager
 }
 
 var b *BuildManager
@@ -51,11 +55,18 @@ func GetBuildManager() *BuildManager {
 func (b *BuildManager) SetTargetDir(d string) {
 	bp := afero.NewBasePathFs(afero.NewOsFs(), d)
 	b.Fs = &bp
+	b.Paths = target_paths.NewTargetPaths(d)
+	b.Db.SetRootPath(b.Paths)
 	b.BuildFormData.SetTargetDirOnlyInBuildConfig(d)
 }
 
 func (b *BuildManager) AppConfig() *app_config.AppConfig {
 	return b.appConfig
+}
+
+func (b *BuildManager) SetAppConfigPath(p string) {
+	b.AppConfigPath = p
+	b.appConfig.SetPath(p)
 }
 
 func (b *BuildManager) SetPackageManager(p package_managers.PackageManagerId) {
@@ -103,8 +114,10 @@ func GetInitialBuildManager() *BuildManager {
 	ac := utils.GetDefaultAppConfigPath()
 	val := BuildManager{
 		AppConfigPath: ac,
+		Paths:         target_paths.NewTargetPaths(ac),
 		appConfig:     app_config.NewAppConfig(ac),
 	}
+	val.Db = database_manager.NewDatabaseManager(val.Paths)
 
 	if val.BuildFormData.TargetDir() == "" {
 		cwd, err := os.Getwd()
@@ -213,8 +226,16 @@ func (b *BuildManager) SendToPreviousStageMsg() tea.Cmd {
 	return signals.SetStage(b.stack[len(b.stack)-1])
 }
 
-func (b *BuildManager) PluginConflicts() []ulld_plugin.PluginConflict {
-	log.Fatal("Need to implement this!")
-	var res []ulld_plugin.PluginConflict
-	return res
+func (b *BuildManager) GatherPluginConflicts() {
+	b.Conflicts.GatherPluginConflicts(b.Plugins)
+}
+
+func (b *BuildManager) Embeddables() []ulld_plugin.PluginEmbeddableTemplateStruct {
+	var embeddables []ulld_plugin.PluginEmbeddableTemplateStruct
+	for _, p := range b.Plugins {
+		for i, c := range p.Components() {
+			embeddables = append(embeddables, c.Embeddables(p.Name, c.ComponentName(), c.ExportPath(), i)...)
+		}
+	}
+	return embeddables
 }

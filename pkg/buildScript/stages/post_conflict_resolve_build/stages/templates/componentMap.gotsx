@@ -1,0 +1,10 @@
+import { AdditionalComponents } from "@ulld/component-map/types";{{range .}}
+import {{.ImportName}} from "{{.ImportPath}}";
+{{end}}
+
+export const generatedComponentMap: AdditionalComponents<any> = [{{range .}}{
+        regex: new RegExp("{{.Regex}}"),
+        component: {{.ImportName}},
+        label: {{.Label}}
+    },{{end}}
+]

@@ -56,8 +56,6 @@ func (b SubStage) CompleteUserMessage() string {
 }
 
 func (b SubStage) InProgressUserMessage() string {
-	// nameStyles := lipgloss.NewStyle().Foreground(lipgloss.Color("211"))
-	// s := b.inProgressMsg + " "
 	return b.inProgressMsg
 }
 
@@ -76,25 +74,15 @@ func (s *SubStage) InConcurrentGroup(concurrentIndex int) bool {
 	return false
 }
 
-// FIX: Passing the cfg here is redundent. Remove this.
 func RunSubCommand(s *SubStage, cfg *build_config.BuildManager, streamId stream_ids.StreamId, defaultCmd tea.Cmd) tea.Cmd {
 	go func() {
 		defer func() {
 			s.status = run_status.Complete
-
-			// cfg2 := build_config.GetBuildManager()
-			// s.program.Send(signals.SendSubStageCompleteMsg(streamId, s.id)())
 			build_config.GetBuildManager().Program.Send(SuccessfulSubCmdMsg(s.Name))
 		}()
 		s.Run(cfg, streamId)
 	}()
-	// This is where you'd do i/o stuff to download and install packages. In
-	// our case we're just pausing for a moment to simulate the process.
-	// return tea.Tick(50*time.Millisecond, func(t time.Time) tea.Msg {
-	// 	return InstalledPkgMsg(s.Name)
-	// })
 	return defaultCmd
-	// return m, tea.Batch(m.spinner.Spinner.Tick, m.waitForActivity(m.sub))
 }
 
 func RunConcurrently(subStages []*SubStage, cfg *build_config.BuildManager, streamId stream_ids.StreamId, waitForActivity tea.Cmd) {

@@ -7,13 +7,13 @@ import (
 	"github.com/Uh-little-less-dum/build/pkg/utils"
 )
 
-type PackageManagerId int
+type PackageManagerId string
 
 const (
-	NpmId PackageManagerId = iota
-	PnpmId
-	YarnId
-	NoPackagekManagerSelected
+	NpmId                     PackageManagerId = "npm"
+	PnpmId                    PackageManagerId = "pnpm"
+	YarnId                    PackageManagerId = "yarn"
+	NoPackagekManagerSelected PackageManagerId = "none"
 )
 
 func GetPackageManagerTitles() map[PackageManagerId]string {
@@ -37,9 +37,10 @@ type PackageManager interface {
 	Install() *exec.Cmd
 	Add(items []types.Installable) *exec.Cmd
 	SetWorkingDir(workingDir string)
+	RunScript(additionalCmds ...string) *exec.Cmd
 }
 
-// FIX: Should alert user that they haven't provided a package manager and return the NoPackagekManagerSelected Id instead of defaulting to pnpm.
+// WARN: Should alert user that they haven't provided a package manager and return the NoPackagekManagerSelected Id instead of defaulting to pnpm.
 func GetPackageManagerStruct(id PackageManagerId) PackageManager {
 	var n PackageManager = &Pnpm{}
 	switch id {
