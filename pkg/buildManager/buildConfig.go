@@ -1,22 +1,33 @@
 package build_config
 
 import (
+	"fmt"
 	"os"
+	"sync"
 
+	additional_sources_manager "github.com/Uh-little-less-dum/build/pkg/additionalSourcesManager"
 	config_loc_strategies "github.com/Uh-little-less-dum/build/pkg/buildConstants/configLocationStrategies"
+	event_handler_types "github.com/Uh-little-less-dum/build/pkg/buildConstants/eventTypes"
 	form_data "github.com/Uh-little-less-dum/build/pkg/buildManager/formData"
 	conflicts_handler "github.com/Uh-little-less-dum/build/pkg/conflicts/conflictsManager"
 	database_manager "github.com/Uh-little-less-dum/build/pkg/databaseManager"
 	env_vars "github.com/Uh-little-less-dum/build/pkg/envVars"
+	event_handlers "github.com/Uh-little-less-dum/build/pkg/eventHandlers"
 	package_managers "github.com/Uh-little-less-dum/build/pkg/packageManager"
 	ulld_plugin "github.com/Uh-little-less-dum/build/pkg/plugin"
+	plugin_component_docs_data "github.com/Uh-little-less-dum/build/pkg/plugin/componentDocs"
+	navigation_link "github.com/Uh-little-less-dum/build/pkg/plugin/navigationLink"
+	plugin_setting_page_data "github.com/Uh-little-less-dum/build/pkg/plugin/settingPageData"
+	styles_manager "github.com/Uh-little-less-dum/build/pkg/stylesManager"
 	target_paths "github.com/Uh-little-less-dum/build/pkg/targetPaths"
 	"github.com/Uh-little-less-dum/build/pkg/types"
 	"github.com/Uh-little-less-dum/build/pkg/utils"
 	app_config "github.com/Uh-little-less-dum/go-utils/pkg/buildFiles/appConfig"
+	build_static_data_output "github.com/Uh-little-less-dum/go-utils/pkg/buildFiles/file_handlers/buildStaticData/outputStruct"
 	file_handlers_package_json "github.com/Uh-little-less-dum/go-utils/pkg/buildFiles/file_handlers/packageJsonHandler"
 	build_stages "github.com/Uh-little-less-dum/go-utils/pkg/constants/buildStages"
 	viper_keys "github.com/Uh-little-less-dum/go-utils/pkg/constants/viperKeys"
+	copy_file "github.com/Uh-little-less-dum/go-utils/pkg/fs/copyFile"
 	"github.com/Uh-little-less-dum/go-utils/pkg/signals"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/log"
@@ -24,6 +35,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+//go:generate ifacemaker -f buildConfig.go -s BuildManager -i BuildManagerInterface -p build_config_test -y "HumanIface makes human interaction easy" -c "DONT EDIT: Auto generated" -o buildConfig_interface_test.go
+//go:generate mockgen -package build_config_test -source=buildConfig_interface_test.go -destination=mocks_test.go *
 type BuildManager struct {
 	form_data.BuildFormData
 	AppConfigPath        string
@@ -43,12 +56,19 @@ type BuildManager struct {
 	Program              *tea.Program
 	Paths                *target_paths.TargetPaths
 	Db                   *database_manager.DatabaseManager
+	AdditionalSources    *additional_sources_manager.AdditionalSourcesManager
+	Styles               *styles_manager.StylesManager
 }
 
 var b *BuildManager
 
+var once sync.Once
+
 // Returns the BuildManager singleton.
 func GetBuildManager() *BuildManager {
+	once.Do(func() {
+		b = GetInitialBuildManager()
+	})
 	return b
 }
 
@@ -71,6 +91,17 @@ func (b *BuildManager) SetAppConfigPath(p string) {
 
 func (b *BuildManager) SetPackageManager(p package_managers.PackageManagerId) {
 	b.packageManager = p
+}
+
+func (b *BuildManager) GetCopyStyleSheets() []*copy_file.CopyFile {
+	var res []*copy_file.CopyFile = b.AdditionalSources.StylePaths(b.Paths)
+	for _, p := range b.Plugins {
+		c, ok := p.CopyFileSheet(b.Paths)
+		if ok {
+			res = append(res, c)
+		}
+	}
+	return res
 }
 
 func (b *BuildManager) PackageManager() package_managers.PackageManager {
@@ -126,6 +157,8 @@ func GetInitialBuildManager() *BuildManager {
 		}
 		val.SetTargetDir(cwd)
 	}
+	val.Styles = styles_manager.NewStylesManager()
+	val.AdditionalSources = additional_sources_manager.NewAdditionalSourcesManager()
 	val.packageManager = package_managers.PnpmId
 	// Handle initial values with environment variables here.
 	val.ConfigDirPath = os.Getenv(string(env_vars.AdditionalSources))
@@ -135,9 +168,9 @@ func GetInitialBuildManager() *BuildManager {
 	return &val
 }
 
-func init() {
-	b = GetInitialBuildManager()
-}
+// func init() {
+// 	b = GetInitialBuildManager()
+// }
 
 func (b *BuildManager) SetInitialStage(s build_stages.BuildStage) {
 	b.stack = []build_stages.BuildStage{s}
@@ -158,6 +191,14 @@ func (b *BuildManager) RemoveStageFromSkipped(stage build_stages.BuildStage) {
 	b.skipStages = skipStages
 }
 
+func (c *BuildManager) SetInitialTargetDir(useCwd bool, targetDir string) {
+	if targetDir != "" {
+		c.SetTargetDir(targetDir)
+	} else {
+
+	}
+}
+
 func (c *BuildManager) Init(args []string) {
 	v := viper.GetViper()
 	acPath := v.GetString(string(viper_keys.AppConfigPath))
@@ -174,6 +215,16 @@ func (c *BuildManager) Init(args []string) {
 		initialStage = build_stages.ConfirmCurrentDirStage
 	}
 	c.SetInitialStage(initialStage)
+	// Set initial target directory.
+	if hasTargetDir {
+		c.SetTargetDir(args[0])
+	} else {
+		cwd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		c.SetTargetDir(cwd)
+	}
 }
 
 // Utility to check if stage should be skipped. Reads data formerly set by AddSkippedStage.
@@ -238,4 +289,118 @@ func (b *BuildManager) Embeddables() []ulld_plugin.PluginEmbeddableTemplateStruc
 		}
 	}
 	return embeddables
+}
+
+func (b *BuildManager) TailwindSources(outputStruct *build_static_data_output.BuildStaticDataOutput) {
+	ch := make(chan string)
+	var wg sync.WaitGroup
+	for _, p := range b.Plugins {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data := p.Config().Get("tailwind.sources")
+			if data.Exists() {
+				items := data.Array()
+				for _, item := range items {
+					ch <- item.Str
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	close(ch)
+	outputStruct.TailwindSources = make([]string, len(ch))
+	for item := range ch {
+		outputStruct.TailwindSources = append(outputStruct.TailwindSources, item)
+	}
+}
+
+// Returns an array of all pluginNames that should be transpiled.
+func (b *BuildManager) PluginsToTranspile(outputStruct *build_static_data_output.BuildStaticDataOutput) {
+	ch := make(chan string)
+	var wg sync.WaitGroup
+	for _, p := range b.Plugins {
+		wg.Add(1)
+		go func() {
+			if p.ShouldTranspile() {
+				ch <- p.Name
+			}
+		}()
+	}
+	wg.Wait()
+	close(ch)
+	outputStruct.TranspilePackages = make([]string, len(ch))
+	for l := range ch {
+		outputStruct.TranspilePackages = append(outputStruct.TranspilePackages, l)
+	}
+}
+
+func (b *BuildManager) EventHandlerListOfType(eventType event_handler_types.PluginEventType) event_handlers.EventHandlerOfTypeList {
+	l := event_handlers.NewEventHandlerOfTypeList(eventType)
+	for _, p := range b.Plugins {
+		data := p.Config()
+		val := data.Get(fmt.Sprintf("events.%s", string(eventType)))
+		if val.Exists() {
+			l.Append(p.Name, val)
+		}
+	}
+	return *l
+}
+
+func (b *BuildManager) ComponentDocsData(outputStruct *build_static_data_output.BuildStaticDataOutput) {
+	var wg sync.WaitGroup
+	ch := make(chan plugin_component_docs_data.ComponenDocData)
+	for _, p := range b.Plugins {
+		for _, c := range p.Components() {
+			wg.Add(1)
+			go func() {
+				data, ok := c.GetComponentDocData(p.Name)
+				if ok {
+					ch <- data
+				}
+			}()
+		}
+	}
+	wg.Wait()
+	n := len(ch)
+	outputStruct.ComponentDocs = make([]plugin_component_docs_data.ComponenDocData, n)
+	for item := range ch {
+		outputStruct.ComponentDocs = append(outputStruct.ComponentDocs, item)
+	}
+}
+
+// Returns an array of items matching the buildStaticData.settingPages.# field.
+func (b *BuildManager) SettingPageData(outputStruct *build_static_data_output.BuildStaticDataOutput) {
+	var wg sync.WaitGroup
+	ch := make(chan plugin_setting_page_data.SettingsPageData)
+	for _, p := range b.Plugins {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			data, ok := p.SettingsPageData()
+			if ok {
+				ch <- data
+			}
+		}()
+	}
+	wg.Wait()
+}
+
+func (b *BuildManager) GetNavigationLinks(outputStruct *build_static_data_output.BuildStaticDataOutput) {
+	var wg sync.WaitGroup
+	ch := make(chan navigation_link.NavigationLink)
+	ch <- navigation_link.NavigationLink{Label: "Settings", Href: "/settings", Icon: "cog"}
+	for _, p := range b.Plugins {
+		wg.Add(1)
+		go func() {
+			p.NavigationLinks(ch)
+			defer wg.Done()
+		}()
+	}
+	wg.Wait()
+	close(ch)
+	outputStruct.NavigationLinks = make([]navigation_link.NavigationLink, len(ch))
+	for navLink := range ch {
+		outputStruct.NavigationLinks = append(outputStruct.NavigationLinks, navLink)
+	}
 }

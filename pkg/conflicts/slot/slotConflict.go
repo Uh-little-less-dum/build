@@ -10,6 +10,9 @@ import (
 type Conflict struct {
 	ParentSlot string
 	SubSlot    string
+	Resolved   bool
+	// acceptedVal: pluginName
+	AcceptedVal string
 }
 
 func (c Conflict) Id() string {
@@ -21,8 +24,10 @@ func (c Conflict) Options() []string {
 	return res
 }
 
-func (c Conflict) OnAccept(acceptedVal string) {
-
+// acceptedVal: pluginName
+func (c *Conflict) OnAccept(acceptedVal string) {
+	c.AcceptedVal = acceptedVal
+	c.Resolved = true
 }
 
 func NewSlotConflict(slotString string) *Conflict {

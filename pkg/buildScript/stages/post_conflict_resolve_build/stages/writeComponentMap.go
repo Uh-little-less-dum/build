@@ -1,11 +1,17 @@
 package post_conflict_resolve_stages
 
 import (
+	"embed"
 	"text/template"
 
 	build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
 	"github.com/Uh-little-less-dum/go-utils/pkg/fs/file"
 	"github.com/charmbracelet/log"
+)
+
+var (
+	//go:embed "templates/*"
+	templateFiles embed.FS
 )
 
 func WriteComponentMap(cfg *build_config.BuildManager) {

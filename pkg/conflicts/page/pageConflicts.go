@@ -1,7 +1,10 @@
 package conflicts_page
 
 type Conflict struct {
-	Url string
+	Url      string
+	Resolved bool
+	// acceptedVal: pluginName
+	AcceptedVal string
 }
 
 func (c Conflict) Id() string {
@@ -13,8 +16,10 @@ func (c Conflict) Options() []string {
 	return res
 }
 
-func (c Conflict) OnAccept(acceptedVal string) {
-
+// acceptedVal: pluginName
+func (c *Conflict) OnAccept(acceptedVal string) {
+	c.AcceptedVal = acceptedVal
+	c.Resolved = true
 }
 
 func NewPageConflict(targetUrl string) *Conflict {

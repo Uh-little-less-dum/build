@@ -99,7 +99,10 @@
   "engines": {
     "node": ">=20"
   },
-  "dependencies": {
+  "prisma": {
+    "schema": "src/database/schema.prisma"
+  },
+  "ulld-dependencies": {
     "@dimforge/rapier3d": "0.12.0",
     "@ducanh2912/next-pwa": "10.2.7",
     "@google/model-viewer": "3.5.0",
@@ -111,8 +114,8 @@
     "@napi-rs/canvas": "0.1.52",
     "@next/mdx": "14.2.3",
     "@next/third-parties": "14.2.3",
-    "@prisma/client": "5.17.0",
-    "@prisma/nextjs-monorepo-workaround-plugin": "5.17.0",
+    "@prisma/client": "6.2.1",
+    "@prisma/nextjs-monorepo-workaround-plugin": "6.2.1",
     "@reduxjs/toolkit": "1.9.7",
     "@trpc/server": "10.45.2",
     "@ulld/api": "0.0.126",
@@ -209,7 +212,7 @@
     "superjson": "2.2.1",
     "zod": "3.23.8"
   },
-  "devDependencies": {
+  "ulld-devDependencies": {
     "@shikijs/rehype": "1.5.2",
     "@shikijs/transformers": "1.6.4",
     "@shikijs/twoslash": "1.5.2",
@@ -237,7 +240,7 @@
     "globby": "14.0.1",
     "postcss": "8.4.39",
     "postcss-import": "16.1.0",
-    "prisma": "5.17.0",
+    "prisma": "6.2.1",
     "sass": "1.77.8",
     "syncpack": "12.4.0",
     "tailwindcss": "3.4.1",
@@ -247,8 +250,5 @@
     "wireit": "0.14.9",
     "zod-prisma-types": "3.1.8"
   },
-  "peerDependencies": {},
-  "prisma": {
-    "schema": "src/database/schema.prisma"
-  }
+  "ulld-peerDependencies": {}
 }

@@ -23,7 +23,7 @@ func ApplyLocalPlugins(b *build_config.BuildManager) {
 	}
 }
 
-// RESUME: Enable these methods once the slotMap struct is in order.
+// TEST: Enable these methods once the slotMap struct is in order.
 func generatePageConflict(b *build_config.BuildManager) {
 }
 

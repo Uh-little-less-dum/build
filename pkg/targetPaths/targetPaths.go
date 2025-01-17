@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	parser_types "github.com/Uh-little-less-dum/go-utils/pkg/constants/parserTypes"
 	"github.com/charmbracelet/log"
 )
 
@@ -24,6 +23,21 @@ func (t TargetPaths) Public() string {
 // Path to styles directory containing all css and scss files.
 func (t TargetPaths) Styles() string {
 	return filepath.Join(t.projectRoot, "src", "styles")
+}
+
+// A seperate, nested directory to contain all plugin and user provided scss files.
+func (t TargetPaths) GeneratedStyles() string {
+	return filepath.Join(t.projectRoot, "src", "styles", "generated")
+}
+
+// Path to the scss tunnel file for the generatedStyles directory.
+func (t TargetPaths) GeneratedStylesTunnelFile() string {
+	return filepath.Join(t.projectRoot, "src", "styles", "generated", "index.scss")
+}
+
+// Returns the relative path to the generated style sheet relative to the user defined style sheets tunnel file.
+func (t TargetPaths) TunnelRelativeStyleSheet(uniqueId string) string {
+	return fmt.Sprintf("./generated/%s", uniqueId)
 }
 
 // Path to package.json file
@@ -113,7 +127,7 @@ func (t TargetPaths) MdxParserList() string {
 	return filepath.Join(t.projectRoot, "src", "methods", "parsers", "parserLists", "mdx.ts")
 }
 
-func (t TargetPaths) ParserListOfType(parserType parser_types.ParserType) string {
+func (t TargetPaths) ParserListOfType(parserType string) string {
 	return filepath.Join(t.projectRoot, "src", "methods", "parsers", "parserLists", fmt.Sprintf("%s.ts", parserType))
 }
 
@@ -149,4 +163,9 @@ func (t TargetPaths) XdgPaths() string {
 
 func NewTargetPaths(rootDir string) *TargetPaths {
 	return &TargetPaths{projectRoot: rootDir}
+}
+
+// Returns the root of the url directory. (The directory that contains the route's page.tsx file.
+func (t *TargetPaths) TargetUrlToDirname(targetUrl string) string {
+	return filepath.Join(t.AppDir(), targetUrl)
 }

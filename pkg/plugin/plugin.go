@@ -1,7 +1,6 @@
 package ulld_plugin
 
 import (
-	"cmp"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,21 +8,24 @@ import (
 
 	conflicts_page "github.com/Uh-little-less-dum/build/pkg/conflicts/page"
 	conflicts_slot "github.com/Uh-little-less-dum/build/pkg/conflicts/slot"
+	navigation_link "github.com/Uh-little-less-dum/build/pkg/plugin/navigationLink"
+	plugin_setting_page_data "github.com/Uh-little-less-dum/build/pkg/plugin/settingPageData"
 	slot_map "github.com/Uh-little-less-dum/build/pkg/slotMap"
 	target_paths "github.com/Uh-little-less-dum/build/pkg/targetPaths"
+	file_handlers_package_json "github.com/Uh-little-less-dum/go-utils/pkg/buildFiles/file_handlers/packageJsonHandler"
+	copy_file "github.com/Uh-little-less-dum/go-utils/pkg/fs/copyFile"
 	"github.com/charmbracelet/log"
 	"github.com/tidwall/gjson"
 )
 
 type Plugin struct {
-	Name            string
-	Version         string
-	Slot            slot_map.SlotKey
-	pluginConfig    PluginConfig
+	Name         string
+	Version      string
+	Slot         slot_map.SlotKey
+	pluginConfig PluginConfig
+	// installLocation points to the directory containing the plugins package.json directly, not the node_modules folder. If set to an empty string, the <target dir>/node_modules/<pluginName> path will be used.
 	installLocation string
 	paths           *target_paths.TargetPaths
-	// Map input urls to urls created by the user durng the conflict resolution stage.
-	ModifiedUrlMap map[string]string
 }
 
 // Returns the install string for a specific package.
@@ -44,7 +46,10 @@ func (plugin *Plugin) InstallString() string {
 
 // WARN: This is likely to be unreliable for some advanced use case. This will either need to dynamically check for pnpm global stores or disable them all together via the generated npmrc.
 func (p Plugin) InstallLocation() string {
-	return filepath.Join(p.paths.TargetDir(), cmp.Or(p.installLocation, filepath.Join("node_modules", p.Name)))
+	if p.installLocation != "" {
+		return p.installLocation
+	}
+	return filepath.Join(p.paths.TargetDir(), filepath.Join("node_modules", p.Name))
 }
 
 func (p *Plugin) SetInstallLocation(path string) {
@@ -53,10 +58,6 @@ func (p *Plugin) SetInstallLocation(path string) {
 
 func (p *Plugin) Config() gjson.Result {
 	return p.pluginConfig.Config(p.InstallLocation(), p.Name)
-}
-
-func (p *Plugin) Events() PluginEvents {
-	return *NewPluginEvents(&p.pluginConfig)
 }
 
 func (p *Plugin) Components() []*PluginComponent {
@@ -80,24 +81,47 @@ func (p *Plugin) Pages() []*PluginPage {
 
 func (p *Plugin) Parsers() []*PluginParser {
 	var res []*PluginParser
+	i := 1
 	p.Config().Get("parsers").ForEach(func(key, value gjson.Result) bool {
-		res = append(res, NewPluginParser(key, value))
+		res = append(res, NewPluginParser(key, value, p.Name, i))
 		return true
 	})
 	return res
+}
+
+func (p Plugin) NavigationLinks(c chan navigation_link.NavigationLink) {
+	data := p.Config().Get("navigationLinks")
+	if data.Exists() {
+		for _, itemData := range data.Array() {
+			c <- navigation_link.NewNavigationLink(itemData)
+		}
+	}
 }
 
 func (p *Plugin) SettingsPage() *PluginSettings {
 	return NewPluginSettings(&p.pluginConfig.data)
 }
 
-func (p *Plugin) AllEmbeddables() []*PluginEmbeddable {
-	var res []*PluginEmbeddable
+// TODO: Make sure to gather this data properly on the typescript side of things. That page isn't yet built.
+func (p *Plugin) SettingsPageUrl() string {
+	return fmt.Sprintf("/settings/%s", p.Name)
+}
+
+func (p *Plugin) AllEmbeddables() []PluginEmbeddableTemplateStruct {
+	var res []PluginEmbeddableTemplateStruct
 	components := p.Components()
-	for _, item := range components {
-		res = append(res, item.Embeddables()...)
+	for i, item := range components {
+		res = append(res, item.Embeddables(p.Name, item.ComponentName(), item.ExportPath(), i)...)
 	}
 	return res
+}
+
+func (p *Plugin) ShouldTranspile() bool {
+	return p.pluginConfig.data.Get("transpile").Bool()
+}
+
+func (b *Plugin) PackageJson() file_handlers_package_json.PackageJsonHandler {
+	return file_handlers_package_json.NewPackageJsonHandler(filepath.Join(b.InstallLocation(), "package.json"))
 }
 
 // TEST: These conflict gatherng methods need to be tested much more thoroughly when on wifi and power, and after the build is in working order.
@@ -114,6 +138,20 @@ func (b *Plugin) HasPageConflict(p *Plugin) []*conflicts_page.Conflict {
 	return res
 }
 
+func (b *Plugin) ExportFieldToAbsolutePath(exportField string) string {
+	return filepath.Join(b.InstallLocation())
+}
+
+func (b *Plugin) CopyFileSheet(paths *target_paths.TargetPaths) (c *copy_file.CopyFile, hasFile bool) {
+	s := b.Config().Get("styles").Str
+	if s == "" {
+		return &copy_file.CopyFile{}, false
+	}
+	return copy_file.NewCopyFileWithUniqueOutput(b.ExportFieldToAbsolutePath(s), func(uniqueId string) string {
+		return filepath.Join(paths.GeneratedStyles(), fmt.Sprintf("%s.scss", uniqueId))
+	}), true
+}
+
 func (b *Plugin) HasSlotConflict(p *Plugin) []*conflicts_slot.Conflict {
 	var res []*conflicts_slot.Conflict
 	for _, c1 := range b.Components() {
@@ -127,4 +165,25 @@ func (b *Plugin) HasSlotConflict(p *Plugin) []*conflicts_slot.Conflict {
 		}
 	}
 	return res
+}
+
+func (p *Plugin) getSettingsPageData() plugin_setting_page_data.SettingsPageData {
+	return plugin_setting_page_data.SettingsPageData{
+		Title:      p.Config().Get("settings.title").Str,
+		Subtitle:   p.Config().Get("settings.subtitle").Str,
+		Href:       p.SettingsPageUrl(),
+		PluginName: p.Name,
+	}
+}
+
+func (p *Plugin) isValidSettingsData(data plugin_setting_page_data.SettingsPageData) bool {
+	if (data.Href == "") || (data.PluginName == "") {
+		return false
+	}
+	return true
+}
+
+func (p *Plugin) SettingsPageData() (data plugin_setting_page_data.SettingsPageData, ok bool) {
+	item := p.getSettingsPageData()
+	return item, p.isValidSettingsData(item)
 }

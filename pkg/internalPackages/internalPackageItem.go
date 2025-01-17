@@ -9,6 +9,7 @@ import (
 type InternalPackageItem struct {
 	Name    string
 	Version string
+	Path    string
 }
 
 // Replaces version of this internal package in the provided PackageJsonFile with the latest version.

@@ -10,11 +10,7 @@ func WriteNoteTypeData(cfg *build_config.BuildManager) {
 	nt := cfg.AppConfig().NoteTypes()
 	var wg sync.WaitGroup
 	for _, n := range nt {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			n.WriteOutput(cfg)
-		}()
+		n.WriteOutput(cfg.Paths.AppDir(), &wg)
 	}
 	wg.Wait()
 }

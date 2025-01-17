@@ -3,8 +3,6 @@ package ulld_plugin
 import (
 	"fmt"
 
-	parser_types "github.com/Uh-little-less-dum/go-utils/pkg/constants/parserTypes"
-	"github.com/charmbracelet/log"
 	"github.com/tidwall/gjson"
 )
 
@@ -12,23 +10,28 @@ type PluginParser struct {
 	// Json equivalent of plugins.#.parsers.#
 	data gjson.Result
 	// Key of parsers object denoting the type of parser (mdx, csv, etc...)
-	parserKey string
+	parserKey  string
+	pluginName string
+	idx        int
 }
 
-type ParserItem struct {
-	ParserType parser_types.ParserType
-	ImportName string
-	ImportPath string
+func (p PluginParser) ImportName() string {
+	return fmt.Sprintf("%sParser_%d", p.parserKey, p.idx)
 }
 
-func (p *PluginParser) ToTemplateData(idx, idx2 int) ParserItem {
-	importPath := p.data.Get("export").Str
-	if importPath == "" {
-		log.Fatal("Attempted to get an empty importPath. Cannot continue.")
-	}
-	return ParserItem{ParserType: parser_types.ParserType(p.parserKey), ImportName: fmt.Sprintf("parser_%d%d", idx, idx2), ImportPath: importPath}
+func (p PluginParser) ExportPath() string {
+	return p.data.Get("export").Str
 }
 
-func NewPluginParser(k, v gjson.Result) *PluginParser {
-	return &PluginParser{data: v, parserKey: k.Str}
+func (p PluginParser) ImportPath() string {
+	exportPath := p.ExportPath()
+	return fmt.Sprintf("%s/%s", p.pluginName, exportPath)
+}
+
+func (p PluginParser) ParserType() string {
+	return p.parserKey
+}
+
+func NewPluginParser(k, v gjson.Result, pluginName string, idx int) *PluginParser {
+	return &PluginParser{data: v, parserKey: k.Str, pluginName: pluginName, idx: idx}
 }

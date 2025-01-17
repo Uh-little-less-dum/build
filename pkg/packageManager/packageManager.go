@@ -5,22 +5,24 @@ import (
 
 	"github.com/Uh-little-less-dum/build/pkg/types"
 	"github.com/Uh-little-less-dum/build/pkg/utils"
+	"github.com/elliotchance/orderedmap/v2"
 )
 
-type PackageManagerId string
+type PackageManagerId int
 
 const (
-	NpmId                     PackageManagerId = "npm"
-	PnpmId                    PackageManagerId = "pnpm"
-	YarnId                    PackageManagerId = "yarn"
-	NoPackagekManagerSelected PackageManagerId = "none"
+	NpmId PackageManagerId = iota
+	PnpmId
+	YarnId
+	NoPackagekManagerSelect
 )
 
-func GetPackageManagerTitles() map[PackageManagerId]string {
-	d := make(map[PackageManagerId]string)
-	d[PnpmId] = "Pnpm"
-	d[NpmId] = "Npm"
-	d[YarnId] = "Yarn"
+func GetPackageManagerTitles() *orderedmap.OrderedMap[PackageManagerId, string] {
+	// d := make(map[PackageManagerId]string)
+	d := orderedmap.NewOrderedMap[PackageManagerId, string]()
+	d.Set(PnpmId, "Pnpm")
+	d.Set(NpmId, "Npm")
+	d.Set(YarnId, "Yarn")
 	return d
 }
 
@@ -34,10 +36,14 @@ func GetAvailablePackageManagers() map[PackageManagerId]bool {
 
 type PackageManager interface {
 	Id() PackageManagerId
+	// Returns a string representation of the package manager to be used in template strings.
+	Key() string
 	Install() *exec.Cmd
 	Add(items []types.Installable) *exec.Cmd
 	SetWorkingDir(workingDir string)
 	RunScript(additionalCmds ...string) *exec.Cmd
+	ModifyPackageJson(data []byte) []byte
+	ModifiesPackageJson() bool
 }
 
 // WARN: Should alert user that they haven't provided a package manager and return the NoPackagekManagerSelected Id instead of defaulting to pnpm.

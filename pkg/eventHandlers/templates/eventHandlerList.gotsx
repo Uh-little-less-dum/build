@@ -1,0 +1,11 @@
+import { OutputMethods } from "@ulld/configschema/types";
+{{range .Items}}import {{.ImportName}} from "{{.ImportPath}}";\n{{end}}
+
+const methodList: OutputMethods<any, "{{.EventType}}"> = [{{range .Items}}
+{
+    func: {{.ImportName}},
+    pluginId: "{{.PluginName}}"
+},{{end}}
+]
+
+export default methodList

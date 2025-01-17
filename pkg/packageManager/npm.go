@@ -14,6 +14,10 @@ func (n *Npm) Id() PackageManagerId {
 	return NpmId
 }
 
+func (n *Npm) Key() string {
+	return "npm"
+}
+
 func (n *Npm) Install() *exec.Cmd {
 	return exec.Command("npm", "install")
 }
@@ -35,4 +39,12 @@ func (n *Npm) SetWorkingDir(workingDir string) {
 func (n *Npm) RunScript(cmds ...string) *exec.Cmd {
 	c := append([]string{"run"}, cmds...)
 	return exec.Command("npm", c...)
+}
+
+func (n *Npm) ModifiesPackageJson() bool {
+	return false
+}
+
+func (n *Npm) ModifyPackageJson(data []byte) []byte {
+	return data
 }

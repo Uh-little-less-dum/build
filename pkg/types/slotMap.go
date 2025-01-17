@@ -1,7 +1,5 @@
 package types
 
-import build_config "github.com/Uh-little-less-dum/build/pkg/buildManager"
-
 type UlldPluginComponent interface {
 	SlotKey() string
 }
@@ -11,5 +9,5 @@ type UlldPlugin interface {
 }
 
 type OutputWriter interface {
-	WriteOutput(cfg *build_config.BuildManager)
+	WriteOutput(cfg *BuildManager)
 }

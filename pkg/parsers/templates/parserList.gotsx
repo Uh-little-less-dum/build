@@ -1,0 +1,9 @@
+import { UnifiedParserOfType } from "@ulld/api/types";{{range .Items}}
+import {{.ImportName}} from "{{.ImportPath}}";{{end}}
+
+const unifiedParserList: UnifiedParserOfType<"{{.ParserType}}">[] = [
+    {{range .Items}}{{.ImportName}},
+    {{end}}
+]
+
+export default unifiedParserList

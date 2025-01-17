@@ -14,6 +14,10 @@ func (n *Yarn) Id() PackageManagerId {
 	return YarnId
 }
 
+func (n *Yarn) Key() string {
+	return "yarn"
+}
+
 func (n *Yarn) Install() *exec.Cmd {
 	return exec.Command("yarn", "install")
 }
@@ -35,4 +39,12 @@ func (n *Yarn) SetWorkingDir(workingDir string) {
 func (n *Yarn) RunScript(cmds ...string) *exec.Cmd {
 	c := append([]string{"run"}, cmds...)
 	return exec.Command("yarn", c...)
+}
+
+func (n *Yarn) ModifiesPackageJson() bool {
+	return false
+}
+
+func (n *Yarn) ModifyPackageJson(data []byte) []byte {
+	return data
 }
