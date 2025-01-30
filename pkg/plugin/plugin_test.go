@@ -20,7 +20,7 @@ func Test_GatherPluginConflicts(t *testing.T) {
 }
 
 // TODO: Add an output to the gatherCliData method that returns only plugins with valid configs, and map over each plugin here. That should catch some errors on the typescript side.
-// RESUME: Come back here and implement the rest of these. Today didn't feel very productive, but all of the boilerplate is pretty much handled.
+// TODO: Come back here and implement the rest of these. Today didn't feel very productive, but all of the boilerplate is pretty much handled.
 var _ = ginkgo.Describe("Plugin suite", func() {
 	var plugin *ulld_plugin.Plugin
 	var pluginTwo *ulld_plugin.Plugin

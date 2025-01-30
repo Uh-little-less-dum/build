@@ -13,6 +13,7 @@ func GetSubStageTree(program *tea.Program) []*sub_stage.SubStage {
 		sub_stage.NewSubStage("Generated personalized paths", "Creating paths based on your configuration", sub_command_ids.WriteNoteTypeOutputs, post_conflict_resolve_stages.WriteNoteTypeData, program),
 		// Plugin based output
 		sub_stage.NewSubStage("Write style sheets", "Generating style sheets from your provided config", sub_command_ids.WriteScssOutput, post_conflict_resolve_stages.WriteStyleSheets, program),
+		sub_stage.NewSubStage("Write slot data", "Generating component slots", sub_command_ids.WriteSlotOutput, post_conflict_resolve_stages.WriteSlotOutput, program),
 		sub_stage.NewSubStage("Write plugin generate output", "Generating plugin pages", sub_command_ids.WritePluginOutput, post_conflict_resolve_stages.WritePluginOutput, program),
 		sub_stage.NewSubStage("Write additional parsers", "Writing additional parsers", sub_command_ids.WriteAdditionalParsers, post_conflict_resolve_stages.WriteAdditionalParserLists, program),
 		// Consolidated plugin output (accumulative across all plugins)

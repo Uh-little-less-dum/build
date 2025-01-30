@@ -4,9 +4,11 @@ package build_config_test
 
 import (
 	config_loc_strategies "github.com/Uh-little-less-dum/build/pkg/buildConstants/configLocationStrategies"
-	navigation_link "github.com/Uh-little-less-dum/build/pkg/buildManager/auxillaryStructs/navigationLink"
 	package_managers "github.com/Uh-little-less-dum/build/pkg/packageManager"
 	ulld_plugin "github.com/Uh-little-less-dum/build/pkg/plugin"
+	plugin_component_docs_data "github.com/Uh-little-less-dum/build/pkg/plugin/componentDocs"
+	navigation_link "github.com/Uh-little-less-dum/build/pkg/plugin/navigationLink"
+	plugin_setting_page_data "github.com/Uh-little-less-dum/build/pkg/plugin/settingPageData"
 	"github.com/Uh-little-less-dum/build/pkg/types"
 	app_config "github.com/Uh-little-less-dum/go-utils/pkg/buildFiles/appConfig"
 	file_handlers_package_json "github.com/Uh-little-less-dum/go-utils/pkg/buildFiles/file_handlers/packageJsonHandler"
@@ -44,9 +46,9 @@ type BuildManagerInterface interface {
 	Embeddables() []ulld_plugin.PluginEmbeddableTemplateStruct
 	// Returns an array of all pluginNames that should be transpiled.
 	PluginsToTranspile() []string
-	ComponentDocsData() []ulld_plugin.ComponenDocData
+	ComponentDocsData() []plugin_component_docs_data.ComponenDocData
 	// Returns an array of items matching the buildStaticData.settingPages.# field.
-	SettingPageData() []ulld_plugin.SettingsPageData
+	SettingPageData() []plugin_setting_page_data.SettingsPageData
 	// FIX: Implement this.
 	GetNavigationLinks() []navigation_link.NavigationLink
 }

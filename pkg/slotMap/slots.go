@@ -31,97 +31,97 @@ func GetSlots() []Slot {
     return []Slot{
         {
     Id: Snippets,
-	SubSlots: []string{
-        "SnippetListPage",
-        "AddSnippetPage",
-        "SnippetList",
-        "SnippetFilter",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("SnippetListPage"),
+        NewSubSlot("AddSnippetPage"),
+        NewSubSlot("SnippetList"),
+        NewSubSlot("SnippetFilter"),
+    }},
         {
     Id: Math,
-	SubSlots: []string{
-        "EquationDetailsModalPage",
-        "EquationsPage",
-        "EquationDetailsPage",
-        "AddEquationPage",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("EquationDetailsModalPage"),
+        NewSubSlot("EquationsPage"),
+        NewSubSlot("EquationDetailsPage"),
+        NewSubSlot("AddEquationPage"),
+    }},
         {
     Id: Editor,
-	SubSlots: []string{
-        "EditorModalPage",
-        "MdxEditorPage",
-        "LatexEditorPage",
-        "EditorPage",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("EditorModalPage"),
+        NewSubSlot("MdxEditorPage"),
+        NewSubSlot("LatexEditorPage"),
+        NewSubSlot("EditorPage"),
+    }},
         {
     Id: UI,
-	SubSlots: []string{
-        "ComponentDocsListPage",
-        "Pagination",
-        "logo",
-        "loadingIndicator",
-        "confirmationModal",
-        "ComponentDocumentationPageWrapper",
-        "AutoSettingsTable",
-        "AutoSettingFormModal",
-        "SearchResultsPage",
-        "BookmarksPage",
-        "NotesSearchResultsList",
-        "NoteSummarySearchResult",
-        "DictionaryLetterList",
-        "DictionaryPageItem",
-        "NoteTypeSecondaryFilter",
-        "NoteTypeSearchResultList",
-        "MdxNoteContainer",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("ComponentDocsListPage"),
+        NewSubSlot("Pagination"),
+        NewSubSlot("logo"),
+        NewSubSlot("loadingIndicator"),
+        NewSubSlot("confirmationModal"),
+        NewSubSlot("ComponentDocumentationPageWrapper"),
+        NewSubSlot("AutoSettingsTable"),
+        NewSubSlot("AutoSettingFormModal"),
+        NewSubSlot("SearchResultsPage"),
+        NewSubSlot("BookmarksPage"),
+        NewSubSlot("NotesSearchResultsList"),
+        NewSubSlot("NoteSummarySearchResult"),
+        NewSubSlot("DictionaryLetterList"),
+        NewSubSlot("DictionaryPageItem"),
+        NewSubSlot("NoteTypeSecondaryFilter"),
+        NewSubSlot("NoteTypeSearchResultList"),
+        NewSubSlot("MdxNoteContainer"),
+    }},
         {
     Id: Bibliography,
-	SubSlots: []string{
-        "BibliographyPage",
-        "BibEntryDetails",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("BibliographyPage"),
+        NewSubSlot("BibEntryDetails"),
+    }},
         {
     Id: TaskManager,
-	SubSlots: []string{
-        "TaskManagerPage",
-        "TaskDetails",
-        "AddTask",
-        "AddTaskList",
-        "TaskListSearchResultList",
-        "TaskListSearchResult",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("TaskManagerPage"),
+        NewSubSlot("TaskDetails"),
+        NewSubSlot("AddTask"),
+        NewSubSlot("AddTaskList"),
+        NewSubSlot("TaskListSearchResultList"),
+        NewSubSlot("TaskListSearchResult"),
+    }},
         {
     Id: Pdf,
-	SubSlots: []string{
-        "FullPdf",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("FullPdf"),
+    }},
         {
     Id: Navigation,
-	SubSlots: []string{
-        "secondary",
-        "NoteDetailSheet",
-        "navbar",
-        "MultiPageSidebar",
-        "FullScreenNavigationMenu",
-        "Footer",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("secondary"),
+        NewSubSlot("NoteDetailSheet"),
+        NewSubSlot("navbar"),
+        NewSubSlot("MultiPageSidebar"),
+        NewSubSlot("FullScreenNavigationMenu"),
+        NewSubSlot("Footer"),
+    }},
         {
     Id: Dashboard,
-	SubSlots: []string{
-        "LandingPage",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("LandingPage"),
+    }},
         {
     Id: Form,
-	SubSlots: []string{
-        "SettingsPageContainer",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("SettingsPageContainer"),
+    }},
         {
     Id: CommandPalette,
-	SubSlots: []string{
-        "commandPalette",
-        }},
+	SubSlots: []SubSlot{
+        NewSubSlot("commandPalette"),
+    }},
         
-        {Id: NoSlotApplied, SubSlots: []string{}},
+        {Id: NoSlotApplied, SubSlots: []SubSlot{}},
     }
 }
 

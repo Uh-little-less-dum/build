@@ -28,6 +28,10 @@ type Plugin struct {
 	paths           *target_paths.TargetPaths
 }
 
+func (p Plugin) HasSlot() bool {
+	return p.Slot != ""
+}
+
 // Returns the install string for a specific package.
 // Example: redux or react-redux@2.15.21
 func (plugin *Plugin) InstallString() string {
@@ -62,10 +66,9 @@ func (p *Plugin) Config() gjson.Result {
 
 func (p *Plugin) Components() []*PluginComponent {
 	var res []*PluginComponent
-	slot := p.Slot
 	components := p.Config().Get("components").Array()
 	for _, c := range components {
-		res = append(res, NewPluginComponent(c, slot))
+		res = append(res, NewPluginComponent(c, p.Slot))
 	}
 	return res
 }

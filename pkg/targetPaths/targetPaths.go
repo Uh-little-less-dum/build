@@ -4,11 +4,22 @@ import (
 	"fmt"
 	"path/filepath"
 
+	fs_utils "github.com/Uh-little-less-dum/build/pkg/fs"
 	"github.com/charmbracelet/log"
 )
 
 type TargetPaths struct {
 	projectRoot string
+}
+
+func (t TargetPaths) JoinTargetDir(subPath []string) string {
+	val := []string{t.TargetDir()}
+	val = append(val, subPath...)
+	return filepath.Join(val...)
+}
+
+func (t TargetPaths) JoinTargetDirString(subPath string) string {
+	return t.JoinTargetDir(fs_utils.SplitPath(subPath))
 }
 
 func (t TargetPaths) TargetDir() string {

@@ -6,4 +6,4 @@
   </a>
 </p>
 
-This is for internal use by the cli, but feel free to look around and contribute! This desperately needs testing if that's your thing.
+This is for internal use by the cli, but feel free to look around and contribute! This desperately needs testing, especially on window's platforms if that's your thing.

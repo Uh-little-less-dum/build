@@ -26,7 +26,6 @@ func WritePluginOutput(cfg *build_config.BuildManager) {
 		}
 		for _, c := range p.Components() {
 			c.WriteDocsOutput(&wg)
-			c.WriteSlotOutput(&wg)
 		}
 		wg.Add(1)
 		go func() {

@@ -1,6 +1,7 @@
 package build_config
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"sync"
@@ -33,6 +34,12 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
+	"github.com/tidwall/gjson"
+)
+
+var (
+	//go:embed "staticData/*"
+	staticFiles embed.FS
 )
 
 //go:generate ifacemaker -f buildConfig.go -s BuildManager -i BuildManagerInterface -p build_config_test -y "HumanIface makes human interaction easy" -c "DONT EDIT: Auto generated" -o buildConfig_interface_test.go
@@ -70,6 +77,14 @@ func GetBuildManager() *BuildManager {
 		b = GetInitialBuildManager()
 	})
 	return b
+}
+
+func (b *BuildManager) SlotMapData() gjson.Result {
+	f, err := staticFiles.ReadFile("staticData/slotData.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return gjson.ParseBytes(f)
 }
 
 func (b *BuildManager) SetTargetDir(d string) {

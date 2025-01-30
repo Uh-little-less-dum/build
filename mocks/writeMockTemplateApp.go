@@ -16,13 +16,13 @@ const (
 )
 
 type MockTemplateFile struct {
-    TemplatePath    string
-	DataType        MockFileType
+	TemplatePath  string
+	DataType      MockFileType
+	BuildMockPath string
 }
 
 func getMockFiles() []MockTemplateFile {
-    return []MockTemplateFile{
-        
+    return []MockTemplateFile{ 
         { TemplatePath: "package.json", BuildMockPath: "package.json.txt", DataType: File },
         { TemplatePath: "next.config.mjs", BuildMockPath: "next.config.mjs.txt", DataType: File },
         { TemplatePath: "tailwind.config.ts", BuildMockPath: "tailwind.config.ts.txt", DataType: File },
